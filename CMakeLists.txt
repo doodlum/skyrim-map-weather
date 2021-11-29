@@ -31,7 +31,7 @@ set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>" CACHE STR
 # ---- Project ----
 
 project(
-	ExampleProject
+	WorldMapWeatherPlugin
 	VERSION 1.0.0
 	LANGUAGES CXX
 )
@@ -79,16 +79,13 @@ set(Boost_USE_STATIC_LIBS ON)
 
 # ---- Dependencies ----
 
-add_subdirectory("extern/CommonLibSSE" CommonLibSSE)
+add_subdirectory(extern/CommonLibSSE CommonLibSSE)
 
 find_package(spdlog REQUIRED CONFIG)
 
 # ---- Add source files ----
 
-set(SOURCES
-	src/main.cpp
-	src/PCH.h
-)
+include (cmake/sourcelist.cmake)
 
 source_group(
 	TREE
@@ -103,6 +100,7 @@ source_group(
 	FILES
 		${CMAKE_CURRENT_BINARY_DIR}/include/Version.h
 )
+
 
 # ---- Create DLL ----
 

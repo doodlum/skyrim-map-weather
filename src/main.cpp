@@ -1,3 +1,6 @@
+#include "Hooks.h"
+
+
 extern "C" DLLEXPORT bool SKSEAPI SKSEPlugin_Query(const SKSE::QueryInterface* a_skse, SKSE::PluginInfo* a_info)
 {
 #ifndef NDEBUG
@@ -50,6 +53,9 @@ extern "C" DLLEXPORT bool SKSEAPI SKSEPlugin_Load(const SKSE::LoadInterface* a_s
 	logger::info("loaded");
 
 	SKSE::Init(a_skse);
+	SKSE::AllocTrampoline(14);
+
+	Hooks::Install();
 
 	return true;
 }
