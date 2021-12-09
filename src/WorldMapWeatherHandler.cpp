@@ -78,19 +78,18 @@ RE::TESWeather* WorldMapWeatherHandler::GetUniqueWeather(const std::string& worl
 	return nullptr;
 }
 
+RE::TESWorldSpace* WorldspaceOnMap()
+{
+	auto mapMenu = RE::UI::GetSingleton()->GetMenu<RE::MapMenu>();
+	return mapMenu->worldSpace;
+}
 
 void WorldMapWeatherHandler::ForceWeather(RE::Sky* a_this, RE::TESWeather* weather, bool arg3)
 {
-	const auto playerPtr = RE::PlayerCharacter::GetSingleton();
+	auto uniqueWeather = GetUniqueWeather(WorldspaceOnMap()->GetFormEditorID());
 
-	 if (playerPtr && playerPtr->GetWorldspace()) {
-		auto worldspaceID = playerPtr->GetWorldspace()->GetFormEditorID();
-		auto uniqueWeather = GetUniqueWeather(worldspaceID);
-		if (uniqueWeather) {
-			 _ForceWeather(a_this, uniqueWeather, arg3);
-			return;
-		}
-	}
-
-	_ForceWeather(a_this, weather, arg3);
+	if (uniqueWeather)
+		_ForceWeather(a_this, uniqueWeather, arg3);
+	else
+		_ForceWeather(a_this, weather, arg3);
 }
