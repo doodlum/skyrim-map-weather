@@ -1,7 +1,17 @@
-#include "Hooks.h"
 
 
-extern "C" DLLEXPORT bool SKSEAPI SKSEPlugin_Query(const SKSE::QueryInterface* a_skse, SKSE::PluginInfo* a_info)
+#include "WorldMapWeatherHandler.h"
+#include <spdlog/sinks/basic_file_sink.h>
+
+#define NDEBUG
+
+#ifndef NDEBUG
+	#define _AMD64_
+	#include <debugapi.h>
+#endif
+
+extern "C" DLLEXPORT bool SKSEAPI
+	SKSEPlugin_Query(const SKSE::QueryInterface* a_skse, SKSE::PluginInfo* a_info)
 {
 #ifndef NDEBUG
 	auto sink = std::make_shared<spdlog::sinks::msvc_sink_mt>();
@@ -11,8 +21,7 @@ extern "C" DLLEXPORT bool SKSEAPI SKSEPlugin_Query(const SKSE::QueryInterface* a
 		return false;
 	}
 
-	*path /= Version::PROJECT;
-	*path += ".log"sv;
+	*path /= fmt::format("{}.log"sv, Version::PROJECT);
 	auto sink = std::make_shared<spdlog::sinks::basic_file_sink_mt>(path->string(), true);
 #endif
 
@@ -26,7 +35,7 @@ extern "C" DLLEXPORT bool SKSEAPI SKSEPlugin_Query(const SKSE::QueryInterface* a
 #endif
 
 	spdlog::set_default_logger(std::move(log));
-	spdlog::set_pattern("%g(%#): [%^%l%$] %v"s);
+	spdlog::set_pattern("%s(%#): [%^%l%$] %v"s);
 
 	logger::info(FMT_STRING("{} v{}"), Version::PROJECT, Version::NAME);
 
@@ -45,17 +54,25 @@ extern "C" DLLEXPORT bool SKSEAPI SKSEPlugin_Query(const SKSE::QueryInterface* a
 		return false;
 	}
 
+	spdlog::default_logger()->flush();
+
 	return true;
 }
 
 extern "C" DLLEXPORT bool SKSEAPI SKSEPlugin_Load(const SKSE::LoadInterface* a_skse)
-{
-	logger::info("loaded");
+{	
+#ifndef NDEBUG
+	while (!IsDebuggerPresent())
+#endif
+
+	logger::info("{} loaded", Version::PROJECT);
 
 	SKSE::Init(a_skse);
 	SKSE::AllocTrampoline(14);
 
-	Hooks::Install();
+	WorldMapWeatherHandler::InstallHooks();
+
+	spdlog::default_logger()->flush();;
 
 	return true;
 }

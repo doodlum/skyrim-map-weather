@@ -1,8 +1,8 @@
 set(SOURCES ${SOURCES}
-	src/Hooks.cpp
-	src/Hooks.h
-	src/WorldMapHandler.cpp
-	src/WorldMapHandler.h
+	src/WorldMapWeatherHandler.cpp
+	src/WorldMapWeatherHandler.h
+	src/FormUtil.cpp
+	src/FormUtil.h
 	src/PCH.h
 	src/main.cpp
 )

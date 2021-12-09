@@ -82,6 +82,7 @@ set(Boost_USE_STATIC_LIBS ON)
 add_subdirectory(extern/CommonLibSSE CommonLibSSE)
 
 find_package(spdlog REQUIRED CONFIG)
+find_package(jsoncpp REQUIRED)
 
 # ---- Add source files ----
 
@@ -132,6 +133,7 @@ target_link_libraries(
 	PRIVATE
 		CommonLibSSE::CommonLibSSE
 		spdlog::spdlog
+		jsoncpp_static
 )
 
 if (MSVC)
