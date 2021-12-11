@@ -4,4 +4,4 @@
 
 [submodule "extern/CommonLibAE"]
 	path = extern/CommonLibAEVR
-	url = https://github.com/Exit-9B/CommonLibSSE/tree/vr.git
+	url = https://github.com/Exit-9B/CommonLibSSE.git
