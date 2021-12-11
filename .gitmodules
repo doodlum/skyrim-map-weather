@@ -2,6 +2,6 @@
 	path = extern/CommonLibSSE
 	url = https://github.com/Ryan-rsm-McKenzie/CommonLibSSE.git
 
-[submodule "extern/CommonLibAE"]
+[submodule "extern/CommonLibAEVR"]
 	path = extern/CommonLibAEVR
 	url = https://github.com/Exit-9B/CommonLibSSE.git
