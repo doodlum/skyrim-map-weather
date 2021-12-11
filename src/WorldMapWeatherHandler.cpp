@@ -5,10 +5,15 @@
 
 void WorldMapWeatherHandler::InstallHooks()
 {
+#if defined(SKYRIMAE) 
+	REL::Relocation<std::uintptr_t> hook{ REL::ID(53146), 0x10F };
+#elif defined(SKYRIMVR)
+	REL::Relocation<std::uintptr_t> hook{ REL::ID(52256), 0xE4 }
+#else
 	REL::Relocation<std::uintptr_t> hook{ REL::ID(52256), 0xE4 };
-
+#endif
 	auto& trampoline = SKSE::GetTrampoline();
-	_ForceWeather = trampoline.write_call<5>(hook.address(), ForceWeather);
+	_SetWeather = trampoline.write_call<5>(hook.address(), SetWeather);
 }
 
 RE::BSResourceNiBinaryStream& operator>>(RE::BSResourceNiBinaryStream& a_sin, Json::Value& a_root)
@@ -33,9 +38,9 @@ RE::BSResourceNiBinaryStream& operator>>(RE::BSResourceNiBinaryStream& a_sin, Js
 	return a_sin;
 }
 
-RE::TESWeather* WorldMapWeatherHandler::GetUniqueWeather(const std::string& worldpspaceID)
+RE::TESWeather* WorldMapWeatherHandler::GetUniqueWeather(const std::string& worldspaceID)
 {
-	auto fileName = std::filesystem::path{ worldpspaceID };
+	auto fileName = std::filesystem::path{ worldspaceID };
 	fileName.replace_extension("json"sv);
 	fileName = std::filesystem::path{ "MapWeathers" } / fileName;
 	RE::BSResourceNiBinaryStream a_fileStream{ fileName.string() };
@@ -84,12 +89,12 @@ RE::TESWorldSpace* WorldspaceOnMap()
 	return mapMenu->worldSpace;
 }
 
-void WorldMapWeatherHandler::ForceWeather(RE::Sky* a_this, RE::TESWeather* weather, bool arg3)
+void WorldMapWeatherHandler::SetWeather(RE::Sky* a_this, RE::TESWeather* weather, bool arg3)
 {
 	auto uniqueWeather = GetUniqueWeather(WorldspaceOnMap()->GetFormEditorID());
 
 	if (uniqueWeather)
-		_ForceWeather(a_this, uniqueWeather, arg3);
+		_SetWeather(a_this, uniqueWeather, arg3);
 	else
-		_ForceWeather(a_this, weather, arg3);
+		_SetWeather(a_this, weather, arg3);
 }

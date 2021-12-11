@@ -1,24 +1,26 @@
 
-
-#include "WorldMapWeatherHandler.h"
-#include <spdlog/sinks/basic_file_sink.h>
-
-#define NDEBUG
-
 #ifndef NDEBUG
 	#define _AMD64_
 	#include <debugapi.h>
 #endif
 
-extern "C" DLLEXPORT bool SKSEAPI
-	SKSEPlugin_Query(const SKSE::QueryInterface* a_skse, SKSE::PluginInfo* a_info)
+#include "Hooks.h"
+
+void InitLogger()
 {
+	static bool initialized = false;
+	if (!initialized) {
+		initialized = true;
+	} else {
+		return;
+	}
+
 #ifndef NDEBUG
 	auto sink = std::make_shared<spdlog::sinks::msvc_sink_mt>();
 #else
 	auto path = logger::log_directory();
 	if (!path) {
-		return false;
+		return;
 	}
 
 	*path /= fmt::format("{}.log"sv, Version::PROJECT);
@@ -37,7 +39,41 @@ extern "C" DLLEXPORT bool SKSEAPI
 	spdlog::set_default_logger(std::move(log));
 	spdlog::set_pattern("%s(%#): [%^%l%$] %v"s);
 
-	logger::info(FMT_STRING("{} v{}"), Version::PROJECT, Version::NAME);
+	logger::info("{} v{}", Version::PROJECT, Version::NAME);
+}
+
+extern "C" DLLEXPORT bool SKSEAPI SKSEPlugin_Load(const SKSE::LoadInterface* a_skse)
+{
+#ifndef NDEBUG
+	while (!IsDebuggerPresent())
+#endif
+	InitLogger();
+
+	logger::info("{} loaded"sv, Version::PROJECT);
+
+	SKSE::Init(a_skse);
+	SKSE::AllocTrampoline(14);
+
+	Hooks::Install();
+
+	return true;
+}
+
+
+extern "C" DLLEXPORT constinit auto SKSEPlugin_Version =
+	[]() {
+		SKSE::PluginVersionData v{};
+		v.pluginVersion = Version::MAJOR;
+		v.PluginName(Version::PROJECT);
+		v.AuthorName("doodlez"sv);
+		v.UsesAddressLibrary(true);
+		return v;
+	}();
+
+#ifdef SKYRIMVR
+extern "C" DLLEXPORT bool SKSEAPI SKSEPlugin_Query(const SKSE::QueryInterface* a_skse, SKSE::PluginInfo* a_info)
+{
+	InitLogger();
 
 	a_info->infoVersion = SKSE::PluginInfo::kVersion;
 	a_info->name = Version::PROJECT.data();
@@ -49,30 +85,34 @@ extern "C" DLLEXPORT bool SKSEAPI
 	}
 
 	const auto ver = a_skse->RuntimeVersion();
-	if (ver < SKSE::RUNTIME_1_5_39) {
-		logger::critical(FMT_STRING("Unsupported runtime version {}"), ver.string());
+	if (ver != SKSE::RUNTIME_VR_1_4_15_1) {
+		logger::critical(FMT_STRING("Unsupported runtime version {}"sv), ver.string());
 		return false;
 	}
 
-	spdlog::default_logger()->flush();
+	return true;
+}
+#else
+extern "C" DLLEXPORT bool SKSEAPI SKSEPlugin_Query(const SKSE::QueryInterface* a_skse, SKSE::PluginInfo* a_info)
+{
+	InitLogger();
+
+	a_info->infoVersion = SKSE::PluginInfo::kVersion;
+	a_info->name = Version::PROJECT.data();
+	a_info->version = Version::MAJOR;
+
+	if (a_skse->IsEditor()) {
+		logger::critical("Loaded in editor, marking as incompatible"sv);
+		return false;
+	}
+
+	const auto ver = a_skse->RuntimeVersion();
+	if (ver != SKSE::RUNTIME_1_5_97) {
+		logger::critical(FMT_STRING("Unsupported runtime version {}"sv), ver.string());
+		return false;
+	}
 
 	return true;
 }
-
-extern "C" DLLEXPORT bool SKSEAPI SKSEPlugin_Load(const SKSE::LoadInterface* a_skse)
-{	
-#ifndef NDEBUG
-	while (!IsDebuggerPresent())
 #endif
 
-	logger::info("{} loaded", Version::PROJECT);
-
-	SKSE::Init(a_skse);
-	SKSE::AllocTrampoline(14);
-
-	WorldMapWeatherHandler::InstallHooks();
-
-	spdlog::default_logger()->flush();;
-
-	return true;
-}

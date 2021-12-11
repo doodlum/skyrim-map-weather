@@ -2,7 +2,13 @@ cmake_minimum_required(VERSION 3.20)
 
 # ---- Options ----
 
+option(BUILD_RELEASE "Build for release (No Debug)" ON)
+
 option(COPY_BUILD "Copy the build output to the Skyrim directory." OFF)
+
+option(BUILD_SKYRIM_AE "Build for Skyrim AE instead of SE" OFF)
+
+option(BUILD_SKYRIM_VR "Build for Skyrim VR" OFF)
 
 # ---- Cache build vars ----
 
@@ -79,7 +85,11 @@ set(Boost_USE_STATIC_LIBS ON)
 
 # ---- Dependencies ----
 
-add_subdirectory(extern/CommonLibSSE CommonLibSSE)
+if (BUILD_SKYRIM_AE OR BUILD_SKYRIM_VR)
+	add_subdirectory("extern/CommonLibAEVR" CommonLibSSE)
+else ()
+	add_subdirectory("extern/CommonLibSSE" CommonLibSSE)
+endif (BUILD_SKYRIM_AE OR BUILD_SKYRIM_VR)
 
 find_package(spdlog REQUIRED CONFIG)
 find_package(jsoncpp REQUIRED)
@@ -137,6 +147,18 @@ target_link_libraries(
 )
 
 if (MSVC)
+	if (BUILD_RELEASE)
+		add_compile_definitions(NDEBUG)
+	endif (BUILD_RELEASE)
+
+	if (BUILD_SKYRIM_AE)
+		add_compile_definitions(SKYRIMAE)
+	endif (BUILD_SKYRIM_AE)
+
+	if (BUILD_SKYRIM_VR)
+		add_compile_definitions(SKYRIMVR)
+	endif (BUILD_SKYRIM_VR)
+
 	target_compile_options(
 		${PROJECT_NAME}
 		PRIVATE
