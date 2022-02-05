@@ -1,14 +1,14 @@
+#include <json/json.h>
 
 #include "WorldMapWeatherHandler.h"
 #include "FormUtil.h"
-#include <json/json.h>
 
 void WorldMapWeatherHandler::InstallHooks()
 {
 #if defined(SKYRIMAE) 
 	REL::Relocation<std::uintptr_t> hook{ REL::ID(53146), 0x10F };
 #elif defined(SKYRIMVR)
-	REL::Relocation<std::uintptr_t> hook{ REL::ID(52256), 0xE4 }
+	REL::Relocation<std::uintptr_t> hook{ REL::ID(52256), 0xE4 };
 #else
 	REL::Relocation<std::uintptr_t> hook{ REL::ID(52256), 0xE4 };
 #endif
@@ -76,7 +76,6 @@ RE::TESWeather* WorldMapWeatherHandler::GetUniqueWeather(const std::string& worl
 				continue;
 			}
 
-			// for now, only one weather per worldspace
 			return weatherRef;
 		}
 	}
@@ -85,13 +84,13 @@ RE::TESWeather* WorldMapWeatherHandler::GetUniqueWeather(const std::string& worl
 
 RE::TESWorldSpace* WorldspaceOnMap()
 {
-	auto mapMenu = RE::UI::GetSingleton()->GetMenu<RE::MapMenu>();
+	const auto mapMenu = RE::UI::GetSingleton()->GetMenu<RE::MapMenu>();
 	return mapMenu->worldSpace;
 }
 
 void WorldMapWeatherHandler::SetWeather(RE::Sky* a_this, RE::TESWeather* weather, bool arg3)
 {
-	auto uniqueWeather = GetUniqueWeather(WorldspaceOnMap()->GetFormEditorID());
+	const auto uniqueWeather = GetUniqueWeather(WorldspaceOnMap()->GetFormEditorID());
 
 	if (uniqueWeather)
 		_SetWeather(a_this, uniqueWeather, arg3);

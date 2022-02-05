@@ -1,10 +1,9 @@
 #include "Hooks.h"
-
 #include "WorldMapWeatherHandler.h"
 
 namespace Hooks
 {
-	void Install()
+	void Hooks::Install()
 	{
 		WorldMapWeatherHandler::InstallHooks();
 		logger::info("Installed all hooks");
