@@ -5,7 +5,7 @@
 			"cacheVariables": {
 				"CMAKE_BUILD_TYPE": {
 					"type": "STRING",
-					"value": "Release"
+					"value": "Debug"
 				}
 			},
 			"errors": {
@@ -32,24 +32,33 @@
 			"cacheVariables": {
 				"CMAKE_MSVC_RUNTIME_LIBRARY": {
 					"type": "STRING",
-					"value": "MultiThreaded$<$<CONFIG:Debug>:Debug>"
+					"value": "MultiThreaded$<$<CONFIG:Debug>:Debug>DLL"
 				},
 				"VCPKG_TARGET_TRIPLET": {
 					"type": "STRING",
-					"value": "x64-windows-static"
+					"value": "x64-windows-static-md"
 				}
 			},
 			"hidden": true,
 			"name": "windows"
 		},
 		{
+			"architecture": {
+				"strategy": "set",
+				"value": "x64"
+			},
 			"cacheVariables": {
 				"CMAKE_CXX_FLAGS": "/EHsc /MP /W4 /WX"
 			},
 			"generator": "Visual Studio 17 2022",
-			"toolset": "v143",
+			"inherits": [
+				"cmake-dev",
+				"vcpkg",
+				"windows"
+			],
 			"hidden": true,
-			"name": "msvc"
+			"name": "vs2022-windows",
+			"toolset": "v143"
 		},
 		{
 			"binaryDir": "${sourceDir}/build/pre-ae",
@@ -60,7 +69,7 @@
 				"cmake-dev",
 				"vcpkg",
 				"windows",
-				"msvc"
+				"vs2022-windows"
 			],
 			"name": "pre-ae"
 		},
@@ -73,7 +82,7 @@
 				"cmake-dev",
 				"vcpkg",
 				"windows",
-				"msvc"
+				"vs2022-windows"
 			],
 			"name": "post-ae"
 		},
@@ -86,7 +95,7 @@
 				"cmake-dev",
 				"vcpkg",
 				"windows",
-				"msvc"
+				"vs2022-windows"
 			],
 			"name": "vr"
 		}

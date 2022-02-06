@@ -24,5 +24,5 @@ xcopy "build\vr\release\*.dll" "dist\vr\SKSE\Plugins\" /I /Y
 xcopy "package" "dist" /I /Y /E
 
 cd dist
-powershell Compress-Archive -Force -Path * -DestinationPath "UniqueMapWeathers-FOMOD.zip"
+powershell Compress-Archive -Force -Path * -DestinationPath "UniqueMapWeather-FOMOD.zip"
 pause

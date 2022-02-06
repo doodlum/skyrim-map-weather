@@ -10,7 +10,6 @@
   ],
   "builtin-baseline": "7e7dad5fe20cdc085731343e0e197a7ae655555b",
   "overrides": [
-    { "name": "fmt", "version": "8.0.1" },
-    {"name": "jsoncpp", "version": "1.9.4" }
+    { "name": "fmt", "version": "8.0.1" }
   ]
 }
