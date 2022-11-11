@@ -1,17 +1,11 @@
 #include <json/json.h>
 
-#include "WorldMapWeatherHandler.h"
 #include "FormUtil.h"
+#include "WorldMapWeatherHandler.h"
 
 void WorldMapWeatherHandler::InstallHooks()
 {
-#if defined(SKYRIMAE) 
-	REL::Relocation<std::uintptr_t> hook{ REL::ID(53146), 0x10F };
-#elif defined(SKYRIMVR)
-	REL::Relocation<std::uintptr_t> hook{ REL::ID(52256), 0xE4 };
-#else
-	REL::Relocation<std::uintptr_t> hook{ REL::ID(52256), 0xE4 };
-#endif
+	REL::Relocation<std::uintptr_t> hook{ REL::RelocationID(52256, 53146).address() + REL::Relocate(0xE4, 0x10F) };
 	auto& trampoline = SKSE::GetTrampoline();
 	_SetWeather = trampoline.write_call<5>(hook.address(), SetWeather);
 }
@@ -41,7 +35,7 @@ RE::BSResourceNiBinaryStream& operator>>(RE::BSResourceNiBinaryStream& a_sin, Js
 RE::TESWeather* WorldMapWeatherHandler::GetUniqueWeather(const std::string& worldspaceID)
 {
 	auto fileName = std::filesystem::path{ worldspaceID };
-	fileName.replace_extension("json"sv);
+	fileName.replace_extension("json");
 	fileName = std::filesystem::path{ "MapWeathers" } / fileName;
 	RE::BSResourceNiBinaryStream a_fileStream{ fileName.string() };
 
@@ -52,27 +46,27 @@ RE::TESWeather* WorldMapWeatherHandler::GetUniqueWeather(const std::string& worl
 	Json::Value root;
 	a_fileStream >> root;
 
-	logger::info("Reading file {}"sv, fileName.string());
+	logger::info("Reading file {}", fileName.string());
 
 	Json::Value weathers = root["weathers"];
 	if (weathers.isArray()) {
 		for (auto& weather : weathers) {
 			if (!weather.isObject()) {
-				logger::warn("Failed to fetch weather from {}"sv, fileName.string());
+				logger::warn("Failed to fetch weather from {}", fileName.string());
 				continue;
 			}
 
 			auto formID = weather["formID"].asString();
 
 			if (formID.empty()) {
-				logger::warn("Weather missing form ID in {}"sv, fileName.string());
+				logger::warn("Weather missing form ID in {}", fileName.string());
 				continue;
 			}
 
 			auto weatherRef = skyrim_cast<RE::TESWeather*>(FormUtil::GetFormFromIdentifier(formID));
 
 			if (!weatherRef) {
-				logger::warn("'{}' did not correspond to a weather reference in {}"sv, formID, fileName.string());
+				logger::warn("'{}' did not correspond to a weather reference in {}", formID, fileName.string());
 				continue;
 			}
 
@@ -85,7 +79,7 @@ RE::TESWeather* WorldMapWeatherHandler::GetUniqueWeather(const std::string& worl
 RE::TESWorldSpace* WorldspaceOnMap()
 {
 	const auto mapMenu = RE::UI::GetSingleton()->GetMenu<RE::MapMenu>();
-	return mapMenu->worldSpace;
+	return mapMenu->GetRuntimeData2().worldSpace;
 }
 
 void WorldMapWeatherHandler::SetWeather(RE::Sky* a_this, RE::TESWeather* weather, bool arg3)
